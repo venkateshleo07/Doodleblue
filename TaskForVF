@@ -1,17 +1,17 @@
-<apex:page controller="CreateRecords" tabStyle="Account" showHeader="false" sidebar="false">
+<apex:page controller="CreateTestAccountRecords" tabStyle="Account" showHeader="false" sidebar="false">
     <apex:form >
-        <!-- Show Accounts-->
+        <!-- Display Accounts-->
         <apex:pageBlock title="Add Account"  rendered="{!showAccount}">
             <apex:pageBlockSection title="Account Details">            
-                <apex:inputField value="{!act.name}" />
-                <apex:inputField value="{!act.site}"/>
-                <apex:inputField value="{!act.type}"/>
-                <apex:inputField value="{!act.accountNumber}"/>              
+                <apex:inputField value="{!acc.name}" />
+                <apex:inputField value="{!acc.site}"/>
+                <apex:inputField value="{!acc.type}"/>
+                <apex:inputField value="{!acc.accountNumber}"/>              
             </apex:pageBlockSection>
             <apex:commandButton value="Next" action="{!showContacts}" />
         </apex:pageBlock>
-        <!--Show Contact-->
-        <apex:pageBlock title="Add Contact" id="pbCon" rendered="{!showContact}">
+        <!--Display Contacts-->
+        <apex:pageBlock title="Add Contact" id="addCon" rendered="{!showContact}">
             <apex:variable var="rowNumber" value="{!0}"/>
             <apex:pageBlockTable value="{!lstContacts}" var="con">
                 <apex:column headerValue="First Name">
@@ -25,7 +25,7 @@
                 </apex:column>
                
                 <apex:column headerValue="Action" >
-                    <apex:commandButton value="Delete" action="{!deleteRow}" reRender="pbCon">
+                    <apex:commandButton value="Delete" action="{!deleteRow}" reRender="addCon">
                         <apex:param name="ContactrowIndex" value="{!rowNumber}"/>
                     </apex:commandButton>
                     <apex:variable var="rowNumber" value="{!rowNumber}"/>
@@ -36,10 +36,10 @@
                <apex:commandButton value="Next" action="{!showOpportunity}" />
             </apex:pageBlockButtons>
         </apex:pageBlock>
-        <!-- Show Opportunity -->
-        <apex:pageBlock title="Add Opportunity" id="pbOppr" rendered="{!showOppor}">
+        <!-- Display Opportunities -->
+        <apex:pageBlock title="Add Opportunity" id="addOppr" rendered="{!showOppor}">
             <apex:variable var="rowNumber" value="{!0}"/>
-            <apex:pageBlockTable value="{!lstOppr}" var="oppr">
+            <apex:pageBlockTable value="{!lstopportunities}" var="oppr">
                 <apex:column headerValue="Opportunity Name">
                     <apex:inputField value="{!oppr.Name}"/>
                 </apex:column>
@@ -51,7 +51,7 @@
                 </apex:column>
                
                 <apex:column headerValue="Action" >
-                    <apex:commandButton value="Delete" action="{!OpprdeleteRow}" reRender="pbOppr">
+                    <apex:commandButton value="Delete" action="{!OpprdeleteRow}" reRender="addOppr">
                         <apex:param name="OpprrowIndex" value="{!rowNumber}"/>
                     </apex:commandButton>
                     <apex:variable var="rowNumber" value="{!rowNumber}"/>
@@ -70,27 +70,26 @@
 
 Controller:
 
-
-public class CreateRecords {
+public class CreateTestAccountRecords {
     Public List<Contact> lstContacts {get;set;}
-    Public List<Opportunity> lstOppr {get;set;}
+    Public List<Opportunity> lstopportunities {get;set;}
     public Integer ContactrowIndex {get;set;}
     public Integer OpprrowIndex {get;set;}
-    public Account act{get;set;}
-    public Contact Con{get;set;}
+    public Account acc{get;set;}
+    public Contact con{get;set;}
     public opportunity oppor{get;set;}
     public boolean showContact{get;set;}
     public boolean showOppor{get;set;}
     public boolean showAccount{get;set;}
    
    
-    public CreateRecords() {
+    public CreateTestAccountRecords() {
         lstContacts = new list<Contact>();
         lstContacts.add(new Contact());
-        lstOppr = new list<Opportunity>();
-        lstOppr.add(new Opportunity());
-        act = new Account();
-        Con=new Contact();
+        lstopportunities = new list<Opportunity>();
+        lstopportunities.add(new Opportunity());
+        acc = new Account();
+        con=new Contact();
         oppor=new opportunity();
         showAccount=true;
     }
@@ -104,11 +103,11 @@ public class CreateRecords {
         return null;
     }
     public void OppraddRow(){
-        lstOppr.add(new Opportunity());
+        lstopportunities.add(new Opportunity());
     }
     public PageReference OpprdeleteRow(){
         OpprrowIndex = Integer.valueOf(ApexPages.currentPage().getParameters().get('OpprrowIndex'));
-        lstOppr.remove(OpprrowIndex);
+        lstopportunities.remove(OpprrowIndex);
         return null;
     }    
     public PageReference cancel() {
@@ -128,21 +127,21 @@ public class CreateRecords {
    
     public PageReference save() {
        
-        upsert act;
+        upsert acc;
         for(Contact objCon:lstContacts){
-            objCon.AccountId=act.id;
+            objCon.AccountId=acc.id;
         }
         if(!lstContacts.isEmpty()){
             system.debug('lstContacts=='+lstContacts);
             insert lstContacts;
         }
        
-        for(Opportunity objOppr:lstOppr){
-            objOppr.AccountId=act.id;
+        for(Opportunity objOppr:lstopportunities){
+            objOppr.AccountId=acc.id;
             objOppr.contactid=lstContacts[0].id;
         }
-         if(!lstOppr.isEmpty()){
-            insert lstOppr;
+         if(!lstopportunities.isEmpty()){
+            insert lstopportunities;
         }
         return null;
     }
